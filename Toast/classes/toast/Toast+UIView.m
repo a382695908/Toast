@@ -40,7 +40,7 @@ static NSString *kDurationKey = @"CSToastDurationKey";
 @interface UIView (ToastPrivate)
 
 - (CGPoint)getPositionFor:(id)position toast:(UIView *)toast;
-- (UIView *)makeViewForMessage:(NSString *)message title:(NSString *)title image:(UIImage *)image;
+- (UIView *)makeViewForMessage:(NSString *)message title:(NSString *)title image:(UIImage *)image font:(UIFont *)font;
 - (UIView *)makeActivityViewForMessage:(NSString *)message;
 
 @end
@@ -50,12 +50,12 @@ static NSString *kDurationKey = @"CSToastDurationKey";
 
 #pragma mark - Toast Methods
 
-- (void)makeToast:(NSString *)message {
-    [self makeToast:message duration:kDefaultLength position:kDefaultPosition];
+- (void)makeToast:(NSString *)message font:(UIFont *)font {
+    [self makeToast:message duration:kDefaultLength position:kDefaultPosition font:font];
 }
 
-- (void)makeToast:(NSString *)message duration:(CGFloat)interval position:(id)position {
-    UIView *toast = [self makeViewForMessage:message title:nil image:nil];
+- (void)makeToast:(NSString *)message duration:(CGFloat)interval position:(id)position font:(UIFont *)font {
+    UIView *toast = [self makeViewForMessage:message title:nil image:nil font:font];
     [self showToast:toast duration:interval position:position];  
 }
 
@@ -216,6 +216,10 @@ static NSString *kDurationKey = @"CSToastDurationKey";
 }
 
 - (UIView *)makeViewForMessage:(NSString *)message title:(NSString *)title image:(UIImage *)image {
+    return [self makeViewForMessage:message title:title image:image font:[UIFont systemFontOfSize:kFontSize]];
+}
+
+- (UIView *)makeViewForMessage:(NSString *)message title:(NSString *)title image:(UIImage *)image font:(UIFont *)font {
     
     /***********************************************************************************
      *                                                                                 *
@@ -278,7 +282,7 @@ static NSString *kDurationKey = @"CSToastDurationKey";
     if (message != nil) {
         messageLabel = [[[UILabel alloc] init] autorelease];
         [messageLabel setNumberOfLines:kMaxMessageLines];
-        [messageLabel setFont:[UIFont systemFontOfSize:kFontSize]];
+        [messageLabel setFont:font];
         [messageLabel setLineBreakMode:UILineBreakModeWordWrap];
         [messageLabel setTextColor:[UIColor whiteColor]];
         [messageLabel setBackgroundColor:[UIColor clearColor]];
