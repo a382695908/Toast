@@ -29,6 +29,8 @@
 #define kImageWidth                 80.0
 #define kImageHeight                80.0
 
+#define CGPointIntegral(point) CGPointMake((int)point.x,(int)point.y)
+
 #define kActivityWidth              100.0
 #define kActivityHeight             100.0
 #define kActivityDefaultPosition    @"center"
@@ -326,7 +328,9 @@ static NSString *kDurationKey = @"CSToastDurationKey";
     // wrapper width uses the longerWidth or the image width, whatever is larger. same logic applies to the wrapper height
     CGFloat wrapperWidth = MAX((imageWidth + (kHorizontalPadding * 2)), (longerLeft + longerWidth + kHorizontalPadding));    
     CGFloat wrapperHeight = MAX((messageTop + messageHeight + kVerticalPadding), (imageHeight + (kVerticalPadding * 2)));
-                         
+      
+    wrapperWidth = ((int)wrapperWidth) % 2 == 0 ? wrapperWidth: roundf(wrapperWidth + 0.5);
+    
     [wrapperView setFrame:CGRectMake(0.0, 0.0, wrapperWidth, wrapperHeight)];
     
     if(titleLabel != nil) {
