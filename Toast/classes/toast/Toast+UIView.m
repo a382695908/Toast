@@ -39,6 +39,62 @@
 static NSString *kDurationKey = @"CSToastDurationKey";
 
 
+#define ROUND_PIXEL(a) (((int)a) % 2 == 0 ? a : roundf(a + 0.5f))
+
+
+@interface NPUIToastView : UIView
+@property (nonatomic, strong) UILabel *messageLabel;
+@end
+
+@implementation NPUIToastView
+
+@synthesize messageLabel = _messageLabel;
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+    // FIXME поддерживаются только тосты с message и больше ни с чем
+    
+    CGSize maxSizeMessage = CGSizeMake(self.superview.bounds.size.width * kMaxWidth,
+                                       self.superview.bounds.size.height * kMaxHeight);
+    CGSize expectedSizeMessage = [self.messageLabel.text sizeWithFont:self.messageLabel.font
+                                                    constrainedToSize:maxSizeMessage
+                                                        lineBreakMode:self.messageLabel.lineBreakMode]; 
+    [self.messageLabel setFrame:CGRectMake(0.0, 0.0,
+                                           expectedSizeMessage.width, 
+                                           expectedSizeMessage.height)];
+    
+    // messageLabel frame values
+    CGFloat messageWidth, messageHeight, messageLeft, messageTop;
+    
+    if(self.messageLabel != nil) {
+        messageWidth = self.messageLabel.bounds.size.width;
+        messageHeight = self.messageLabel.bounds.size.height;
+        messageLeft = kHorizontalPadding;
+        messageTop = kVerticalPadding;
+    } else {
+        messageWidth = messageHeight = messageLeft = messageTop = 0.0;
+    }
+    
+    // wrapper width uses the longerWidth or the image width, whatever is larger. same logic applies to the wrapper height
+    CGFloat wrapperWidth = MAX((kHorizontalPadding * 2), (messageLeft + messageWidth + kHorizontalPadding));    
+    CGFloat wrapperHeight = MAX((messageTop + messageHeight + kVerticalPadding), (kVerticalPadding * 2));
+    
+    [self setBounds:CGRectMake(0.0, 0.0,
+                               ROUND_PIXEL(wrapperWidth),
+                               ROUND_PIXEL(wrapperHeight))];
+    
+    if(self.messageLabel != nil) {
+        [self.messageLabel setFrame:CGRectMake(ROUND_PIXEL(messageLeft),
+                                               ROUND_PIXEL(messageTop),
+                                               ROUND_PIXEL(messageWidth),
+                                               ROUND_PIXEL(messageHeight))];
+    }
+}
+
+@end
+
 @interface UIView (ToastPrivate)
 
 - (CGPoint)getPositionFor:(id)position toast:(UIView *)toast;
@@ -95,6 +151,12 @@ static NSString *kDurationKey = @"CSToastDurationKey";
     
     [toast setCenter:toastPoint];
     [toast setAlpha:0.0];
+
+    if ([point isKindOfClass:[NSString class]] &&
+        [point isEqualToString:@"bottom"]) {
+        toast.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
+    }
+
     [self addSubview:toast];
     
     [UIView beginAnimations:@"fade_in" context:toast];
@@ -236,7 +298,7 @@ static NSString *kDurationKey = @"CSToastDurationKey";
     UIImageView *imageView = nil;
     
     // create the parent view
-    UIView *wrapperView = [[[UIView alloc] init] autorelease];
+    NPUIToastView *wrapperView = [[[NPUIToastView alloc] init] autorelease];
     [wrapperView.layer setCornerRadius:kCornerRadius];
     if (kDisplayShadow) {
         [wrapperView.layer setShadowColor:[UIColor blackColor].CGColor];
@@ -295,6 +357,7 @@ static NSString *kDurationKey = @"CSToastDurationKey";
         CGSize maxSizeMessage = CGSizeMake((self.bounds.size.width * kMaxWidth) - imageWidth, self.bounds.size.height * kMaxHeight);
         CGSize expectedSizeMessage = [message sizeWithFont:messageLabel.font constrainedToSize:maxSizeMessage lineBreakMode:messageLabel.lineBreakMode]; 
         [messageLabel setFrame:CGRectMake(0.0, 0.0, expectedSizeMessage.width, expectedSizeMessage.height)];
+        wrapperView.messageLabel = messageLabel;
     }
     
     // titleLabel frame values
@@ -340,6 +403,7 @@ static NSString *kDurationKey = @"CSToastDurationKey";
     
     if(messageLabel != nil) {
         [messageLabel setFrame:CGRectMake(messageLeft, messageTop, messageWidth, messageHeight)];
+        messageLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         [wrapperView addSubview:messageLabel];
     }
     
