@@ -393,9 +393,10 @@ static NSString *kDurationKey = @"CSToastDurationKey";
     CGFloat wrapperHeight = MAX((messageTop + messageHeight + kVerticalPadding), (imageHeight + (kVerticalPadding * 2)));
       
     wrapperWidth = ((int)wrapperWidth) % 2 == 0 ? wrapperWidth: roundf(wrapperWidth + 0.5);
+    wrapperHeight = ((int)wrapperHeight) % 2 == 0 ? wrapperHeight: roundf(wrapperHeight + 0.5);
     
     [wrapperView setFrame:CGRectMake(0.0, 0.0, wrapperWidth, wrapperHeight)];
-    
+
     if(titleLabel != nil) {
         [titleLabel setFrame:CGRectMake(titleLeft, titleTop, titleWidth, titleHeight)];
         [wrapperView addSubview:titleLabel];
